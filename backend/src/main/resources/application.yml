@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: japanese-learn
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/japaneselearn}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+      continue-on-error: true
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.japaneselearn: INFO
+    org.hibernate.SQL: WARN
