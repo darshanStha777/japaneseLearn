@@ -1,0 +1,2 @@
+-- Schema is managed by Spring JPA (ddl-auto: update)
+-- See database/schema.sql for the complete schema
