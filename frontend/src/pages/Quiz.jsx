@@ -98,7 +98,7 @@ const Quiz = () => {
     try {
       const data = await quizAPI.getQuestions(type.id, null, 10);
       setQuestions(Array.isArray(data) ? data : MOCK_QUESTIONS);
-    } catch (_err) {
+    } catch {
       setQuestions(MOCK_QUESTIONS);
     }
     setCurrentIndex(0);

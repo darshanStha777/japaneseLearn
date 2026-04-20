@@ -11,7 +11,7 @@ const QuizHistory = () => {
       try {
         const data = await quizAPI.getHistory();
         setHistory(data || []);
-      } catch (_err) {
+      } catch {
         setHistory([]);
       } finally {
         setLoading(false);

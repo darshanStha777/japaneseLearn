@@ -5,14 +5,15 @@ const Flashcard = ({ word, onResult, currentIndex, totalWords }) => {
   const [flipped, setFlipped] = useState(false);
   const [animating, setAnimating] = useState(false);
 
+  const relatedWordsSource = word?.relatedWords || '';
   const relatedWords = useMemo(() => {
-    if (!word?.relatedWords) return [];
-    return word.relatedWords
+    if (!relatedWordsSource) return [];
+    return relatedWordsSource
       .split(',')
       .map((item) => item.trim())
       .filter(Boolean)
       .slice(0, 3);
-  }, [word?.relatedWords]);
+  }, [relatedWordsSource]);
 
   const handleFlip = () => {
     if (!animating) {

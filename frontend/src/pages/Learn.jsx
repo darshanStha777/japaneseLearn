@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Flashcard from '../components/Flashcard';
 import { vocabAPI, studyAPI } from '../services/api';
 
@@ -10,11 +10,7 @@ const Learn = () => {
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState('today'); // today | review
 
-  useEffect(() => {
-    fetchWords();
-  }, [mode]);
-
-  const fetchWords = async () => {
+  const fetchWords = useCallback(async () => {
     try {
       setLoading(true);
       let data;
@@ -32,7 +28,11 @@ const Learn = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [mode]);
+
+  useEffect(() => {
+    fetchWords();
+  }, [fetchWords]);
 
   const handleCardResult = async (word, result) => {
     const resultKey = result.toLowerCase();
