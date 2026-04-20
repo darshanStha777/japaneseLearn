@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { MASTERY_LABELS, MASTERY_COLORS } from '../services/srsCalculator';
 
 const Flashcard = ({ word, onResult, currentIndex, totalWords }) => {
   const [flipped, setFlipped] = useState(false);
   const [animating, setAnimating] = useState(false);
 
-  useEffect(() => {
-    setFlipped(false);
-  }, [word]);
+  const relatedWords = useMemo(() => {
+    if (!word?.relatedWords) return [];
+    return word.relatedWords
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 3);
+  }, [word?.relatedWords]);
 
   const handleFlip = () => {
     if (!animating) {
@@ -70,6 +75,21 @@ const Flashcard = ({ word, onResult, currentIndex, totalWords }) => {
                 {word.sentenceEnglish}
               </p>
             )}
+            <div className="mt-3 space-y-1">
+              <p className="text-xs text-indigo-700 dark:text-indigo-300 font-medium text-center">
+                🧠 School method: Kanji → Hiragana → English (3 times aloud)
+              </p>
+              {relatedWords.length > 0 && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  Similar words: {relatedWords.join(' ・ ')}
+                </p>
+              )}
+              {word.wordFormation && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  Pattern: {word.wordFormation}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

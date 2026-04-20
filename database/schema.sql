@@ -15,7 +15,7 @@ CREATE TABLE users (
     username VARCHAR(255) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255),
-    exam_date DATE DEFAULT '2025-07-06',
+    exam_date DATE DEFAULT '2026-07-07',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -117,7 +117,7 @@ CREATE INDEX idx_quiz_user ON quiz_attempts(user_id);
 
 -- Insert default user
 INSERT INTO users (id, username, email, exam_date)
-VALUES (1, 'default_user', 'user@japaneselearn.com', '2025-07-06')
+VALUES (1, 'default_user', 'user@japaneselearn.com', '2026-07-07')
 ON CONFLICT DO NOTHING;
 
 -- Insert default learning stats

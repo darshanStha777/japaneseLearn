@@ -3,6 +3,7 @@ import { quizAPI } from '../services/api';
 
 const QUIZ_TYPES = [
   { id: 'multiple_choice', label: 'Multiple Choice', icon: '🎯', desc: 'Choose the correct meaning' },
+  { id: 'similar_words', label: 'Similar Words Drill', icon: '🧠', desc: 'Learn close meanings and nuance' },
   { id: 'kanji_recognition', label: 'Kanji Recognition', icon: '漢', desc: 'Identify the kanji reading' },
   { id: 'meaning_to_kanji', label: 'Meaning → Kanji', icon: '🔤', desc: 'Choose the correct kanji' },
   { id: 'fill_blank', label: 'Fill in Blank', icon: '✏️', desc: 'Complete the sentence' },
@@ -86,7 +87,7 @@ const Quiz = () => {
     if (phase === 'quiz' && selectedType?.id === 'timed' && timeLeft > 0) {
       timer = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
     } else if (timeLeft === 0) {
-      handleNext();
+      timer = setTimeout(() => handleNext(), 0);
     }
     return () => clearTimeout(timer);
   }, [timeLeft, phase, selectedType, handleNext]);
@@ -97,7 +98,7 @@ const Quiz = () => {
     try {
       const data = await quizAPI.getQuestions(type.id, null, 10);
       setQuestions(Array.isArray(data) ? data : MOCK_QUESTIONS);
-    } catch (err) {
+    } catch (_err) {
       setQuestions(MOCK_QUESTIONS);
     }
     setCurrentIndex(0);
@@ -293,6 +294,21 @@ const Quiz = () => {
           {showFeedback && (
             <div className={`text-center p-3 rounded-lg ${selectedAnswer === currentQuestion.correctAnswer ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'}`}>
               {selectedAnswer === currentQuestion.correctAnswer ? '✅ Correct!' : `❌ The answer is: ${currentQuestion.correctAnswer}`}
+            </div>
+          )}
+
+          {(currentQuestion.learningTip || currentQuestion.similarWords?.length > 0) && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+              {currentQuestion.learningTip && (
+                <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">
+                  📌 {currentQuestion.learningTip}
+                </p>
+              )}
+              {currentQuestion.similarWords?.length > 0 && (
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                  Similar words: {currentQuestion.similarWords.join(' ・ ')}
+                </p>
+              )}
             </div>
           )}
 

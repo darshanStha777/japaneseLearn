@@ -22,4 +22,6 @@ public class QuizQuestionDTO {
     private String correctAnswer;
     private String exampleSentence;
     private String sentenceEnglish;
+    private List<String> similarWords;
+    private String learningTip;
 }

@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const Settings = ({ darkMode, toggleDarkMode }) => {
-  const [examDate, setExamDate] = useState('');
-  const [dailyTarget, setDailyTarget] = useState(60);
+  const [examDate, setExamDate] = useState(() => localStorage.getItem('examDate') || '2026-07-07');
+  const [dailyTarget, setDailyTarget] = useState(() => {
+    const parsedTarget = Number.parseInt(localStorage.getItem('dailyTarget') || '60', 10);
+    return Number.isNaN(parsedTarget) ? 60 : parsedTarget;
+  });
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    const savedDate = localStorage.getItem('examDate') || '2025-07-06';
-    const savedTarget = parseInt(localStorage.getItem('dailyTarget') || '60');
-    setExamDate(savedDate);
-    setDailyTarget(savedTarget);
-  }, []);
 
   const handleSave = () => {
     localStorage.setItem('examDate', examDate);
@@ -47,7 +43,7 @@ const Settings = ({ darkMode, toggleDarkMode }) => {
               min="20"
               max="100"
               value={dailyTarget}
-              onChange={(e) => setDailyTarget(parseInt(e.target.value))}
+              onChange={(e) => setDailyTarget(Number.parseInt(e.target.value, 10))}
               className="flex-1"
             />
             <span className="font-bold text-red-600 w-16 text-right">{dailyTarget} words</span>

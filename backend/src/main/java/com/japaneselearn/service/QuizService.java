@@ -36,30 +36,28 @@ public class QuizService {
 
         Collections.shuffle(allVocab);
         List<Vocabulary> selectedVocab = allVocab.stream().limit(count).collect(Collectors.toList());
-
-        return selectedVocab.stream()
-            .map(v -> createQuestion(v, allVocab, type))
-            .collect(Collectors.toList());
+        List<QuizQuestionDTO> questions = new ArrayList<>();
+        for (Vocabulary vocab : selectedVocab) {
+            questions.add(createQuestion(vocab, allVocab, type));
+        }
+        return questions;
     }
 
     private QuizQuestionDTO createQuestion(Vocabulary vocab, List<Vocabulary> allVocab, String type) {
-        List<String> wrongOptions = allVocab.stream()
-            .filter(v -> !v.getId().equals(vocab.getId()))
-            .map(Vocabulary::getEnglishMeaning)
-            .collect(Collectors.toList());
-        Collections.shuffle(wrongOptions);
-        
-        List<String> options = new ArrayList<>(wrongOptions.subList(0, Math.min(3, wrongOptions.size())));
-        options.add(vocab.getEnglishMeaning());
-        Collections.shuffle(options);
+        String quizType = (type == null || type.isBlank()) ? "multiple_choice" : type;
+        List<String> options = "similar_words".equals(quizType)
+            ? buildSimilarMeaningOptions(vocab, allVocab)
+            : buildBasicOptions(vocab, allVocab);
 
-        String questionText = "multiple_choice".equals(type)
+        String questionText = "similar_words".equals(quizType)
+            ? "Choose the closest meaning for " + vocab.getKanji() + " (" + vocab.getFurigana() + ")."
+            : "multiple_choice".equals(quizType)
             ? "What is the meaning of " + vocab.getKanji() + " (" + vocab.getFurigana() + ")?"
             : "Choose the correct meaning for: " + vocab.getKanji();
 
         return QuizQuestionDTO.builder()
             .id(vocab.getId())
-            .type(type != null ? type : "multiple_choice")
+            .type(quizType)
             .question(questionText)
             .kanji(vocab.getKanji())
             .furigana(vocab.getFurigana())
@@ -68,7 +66,75 @@ public class QuizService {
             .correctAnswer(vocab.getEnglishMeaning())
             .exampleSentence(vocab.getExampleSentence())
             .sentenceEnglish(vocab.getSentenceEnglish())
+            .similarWords(extractSimilarWords(vocab, allVocab))
+            .learningTip(buildLearningTip(vocab))
             .build();
+    }
+
+    private List<String> buildBasicOptions(Vocabulary vocab, List<Vocabulary> allVocab) {
+        List<String> wrongOptions = allVocab.stream()
+            .filter(v -> !v.getId().equals(vocab.getId()))
+            .map(Vocabulary::getEnglishMeaning)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+        Collections.shuffle(wrongOptions);
+
+        List<String> options = new ArrayList<>(wrongOptions.subList(0, Math.min(3, wrongOptions.size())));
+        options.add(vocab.getEnglishMeaning());
+        Collections.shuffle(options);
+        return options;
+    }
+
+    private List<String> buildSimilarMeaningOptions(Vocabulary vocab, List<Vocabulary> allVocab) {
+        List<String> candidates = allVocab.stream()
+            .filter(v -> !v.getId().equals(vocab.getId()))
+            .filter(v -> Objects.equals(v.getCategory(), vocab.getCategory())
+                || Objects.equals(v.getPartOfSpeech(), vocab.getPartOfSpeech()))
+            .map(Vocabulary::getEnglishMeaning)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+
+        if (candidates.size() < 3) {
+            candidates = allVocab.stream()
+                .filter(v -> !v.getId().equals(vocab.getId()))
+                .map(Vocabulary::getEnglishMeaning)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        }
+
+        Collections.shuffle(candidates);
+        List<String> options = new ArrayList<>(candidates.stream().limit(3).toList());
+        options.add(vocab.getEnglishMeaning());
+        Collections.shuffle(options);
+        return options;
+    }
+
+    private List<String> extractSimilarWords(Vocabulary vocab, List<Vocabulary> allVocab) {
+        if (vocab.getRelatedWords() != null && !vocab.getRelatedWords().isBlank()) {
+            return Arrays.stream(vocab.getRelatedWords().split(","))
+                .map(String::trim)
+                .filter(word -> !word.isBlank())
+                .limit(3)
+                .collect(Collectors.toList());
+        }
+
+        return allVocab.stream()
+            .filter(v -> !v.getId().equals(vocab.getId()))
+            .filter(v -> Objects.equals(v.getCategory(), vocab.getCategory()))
+            .map(Vocabulary::getKanji)
+            .filter(Objects::nonNull)
+            .limit(3)
+            .collect(Collectors.toList());
+    }
+
+    private String buildLearningTip(Vocabulary vocab) {
+        if (vocab.getWordFormation() != null && !vocab.getWordFormation().isBlank()) {
+            return "Word pattern tip: " + vocab.getWordFormation();
+        }
+        return "School method: say Kanji → Hiragana → English aloud 3 times, then make one short sentence.";
     }
 
     public Map<String, Object> submitAnswer(Long vocabularyId, String selectedAnswer, String quizType) {

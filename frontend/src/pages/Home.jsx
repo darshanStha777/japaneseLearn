@@ -31,7 +31,7 @@ const Home = () => {
   const [todayProgress, setTodayProgress] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const examDate = localStorage.getItem('examDate') || '2025-07-06';
+  const examDate = localStorage.getItem('examDate') || '2026-07-07';
   const daysUntilExam = differenceInDays(parseISO(examDate), new Date());
 
   useEffect(() => {

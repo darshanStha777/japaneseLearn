@@ -138,6 +138,7 @@ const Learn = () => {
 
       {words.length > 0 ? (
         <Flashcard
+          key={words[currentIndex]?.id || currentIndex}
           word={words[currentIndex]}
           onResult={handleCardResult}
           currentIndex={currentIndex}
